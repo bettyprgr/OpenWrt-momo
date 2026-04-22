@@ -68,15 +68,15 @@ function build_singbox_config(parsed) {
 			"servers": [
 				{
 					"tag": "dns-remote",
-					"type": "tls",
+					"type": "https",
 					"server": "1.1.1.2",
+					"path": "/dns-query",
 					"detour": "proxy"
 				},
 				{
 					"tag": "dns-local",
-					"type": "https",
-					"server": "223.5.5.5",
-					"path": "/dns-query"
+					"type": "udp",
+					"server": "223.5.5.5"
 				}
 			],
 			"rules": [
