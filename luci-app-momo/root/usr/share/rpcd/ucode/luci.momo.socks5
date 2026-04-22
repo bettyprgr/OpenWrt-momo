@@ -67,23 +67,31 @@ function build_singbox_config(parsed) {
 		"dns": {
 			"servers": [
 				{
-					"tag": "dns-remote",
+					"tag": "default-dns",
+					"type": "udp",
+					"server": "223.5.5.5"
+				},
+				{
+					"tag": "system-dns",
+					"type": "local"
+				},
+				{
+					"tag": "main-dns",
 					"type": "https",
 					"server": "1.1.1.2",
 					"path": "/dns-query",
+					"domain_resolver": {
+						"server": "default-dns",
+						"strategy": "ipv4_only"
+					},
 					"detour": "proxy"
-				},
-				{
-					"tag": "dns-local",
-					"type": "udp",
-					"server": "223.5.5.5"
 				}
 			],
 			"rules": [
-				{ "clash_mode": "Direct", "action": "route", "server": "dns-local" },
-				{ "clash_mode": "Global", "action": "route", "server": "dns-remote" }
+				{ "clash_mode": "Direct", "action": "route", "server": "default-dns" },
+				{ "clash_mode": "Global", "action": "route", "server": "main-dns" }
 			],
-			"final": "dns-remote",
+			"final": "main-dns",
 			"independent_cache": true
 		},
 		"inbounds": [
@@ -124,7 +132,10 @@ function build_singbox_config(parsed) {
 				"version": "5",
 				"username": parsed.username,
 				"password": parsed.password,
-				"domain_resolver": "dns-local"
+				"domain_resolver": {
+					"server": "default-dns",
+					"strategy": "prefer_ipv4"
+				}
 			},
 			{ "type": "direct", "tag": "direct" }
 		],
@@ -137,7 +148,9 @@ function build_singbox_config(parsed) {
 			],
 			"final": "proxy",
 			"default_domain_resolver": {
-				"server": "dns-local"
+				"action": "route",
+				"server": "default-dns",
+				"strategy": "prefer_ipv4"
 			},
 			"auto_detect_interface": true
 		}
