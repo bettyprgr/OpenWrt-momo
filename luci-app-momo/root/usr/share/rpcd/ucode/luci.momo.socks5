@@ -3,7 +3,52 @@
 'use strict';
 
 import { writefile } from 'fs';
+import { connect } from 'ubus';
 import { get_paths } from '/etc/momo/ucode/include.uc';
+
+const WAN_DNS_FALLBACK = '223.5.5.5';
+
+function first_dns_server(status) {
+	if (!status) return null;
+
+	let dns = status['dns-server'];
+	if (type(dns) === 'array') {
+		for (let v in dns) {
+			if (type(v) === 'string' && trim(v) !== '')
+				return trim(v);
+		}
+	}
+	if (type(dns) === 'string' && trim(dns) !== '')
+		return trim(dns);
+
+	return null;
+}
+
+function resolve_wan_dns() {
+	let ubus;
+	try {
+		ubus = connect();
+	} catch (e) {
+		return WAN_DNS_FALLBACK;
+	}
+
+	if (!ubus)
+		return WAN_DNS_FALLBACK;
+
+	let wan = null;
+	let wan6 = null;
+
+	try {
+		wan = ubus.call('network.interface', 'status', { 'interface': 'wan' });
+	} catch (e) {}
+
+	try {
+		wan6 = ubus.call('network.interface', 'status', { 'interface': 'wan6' });
+	} catch (e) {}
+
+	let dns = first_dns_server(wan) || first_dns_server(wan6);
+	return dns || WAN_DNS_FALLBACK;
+}
 
 /**
  * Parse a SOCKS5 credential string of the form:
@@ -58,7 +103,7 @@ function parse_socks5(credentials) {
  * Inbound tags and port defaults match momo's documented defaults so
  * the mixin system and proxy hijack work out of the box.
  */
-function build_singbox_config(parsed) {
+function build_singbox_config(parsed, wan_dns) {
 	return {
 		"log": {
 			"level": "info",
@@ -69,7 +114,7 @@ function build_singbox_config(parsed) {
 				{
 					"tag": "default-dns",
 					"type": "udp",
-					"server": "223.5.5.5"
+					"server": wan_dns
 				},
 				{
 					"tag": "system-dns",
@@ -188,7 +233,8 @@ const methods = {
 			const paths = get_paths();
 			const dest  = paths.profiles_dir + '/' + safe_name;
 
-			const config = build_singbox_config(parsed);
+			const wan_dns = resolve_wan_dns();
+			const config = build_singbox_config(parsed, wan_dns);
 			const json_str = sprintf('%J', config);
 
 			const written = writefile(dest, json_str);
