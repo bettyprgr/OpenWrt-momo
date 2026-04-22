@@ -5,7 +5,8 @@
             "uci": [ "momo" ],
             "ubus": {
                 "rc": [ "*" ],
-                "luci.momo": [ "*" ]
+                "luci.momo": [ "*" ],
+                "luci.momo.socks5": [ "*" ]
             },
             "file": {
                 "/etc/momo/profiles/*.json": ["read"],
@@ -16,6 +17,9 @@
         },
         "write": {
             "uci": [ "momo" ],
+            "ubus": {
+                "luci.momo.socks5": [ "*" ]
+            },
             "file": {
                 "/etc/momo/profiles/*.json": ["write"],
                 "/etc/momo/subscriptions/*.json": ["write"],
