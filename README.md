@@ -74,7 +74,7 @@ Note that the steps above may change base on config.
 
 ```shell
 # add feed
-echo "src-git momo https://github.com/nikkinikki-org/OpenWrt-momo.git;main" >> "feeds.conf.default"
+echo "src-git momo https://github.com/bettyprgr/OpenWrt-momo.git;main" >> "feeds.conf.default"
 # update & install feeds
 ./scripts/feeds update -a
 ./scripts/feeds install -a
