@@ -68,23 +68,21 @@ function build_singbox_config(parsed) {
 			"servers": [
 				{
 					"tag": "dns-remote",
-					"address": "tls://8.8.8.8",
+					"type": "tls",
+					"server": "8.8.8.8",
 					"detour": "proxy"
 				},
 				{
 					"tag": "dns-local",
-					"address": "https://223.5.5.5/dns-query",
+					"type": "https",
+					"server": "223.5.5.5",
+					"path": "/dns-query",
 					"detour": "direct"
-				},
-				{
-					"tag": "dns-block",
-					"address": "rcode://success"
 				}
 			],
 			"rules": [
-				{ "outbound": "any", "server": "dns-local" },
-				{ "clash_mode": "Direct", "server": "dns-local" },
-				{ "clash_mode": "Global", "server": "dns-remote" }
+				{ "clash_mode": "Direct", "action": "route", "server": "dns-local" },
+				{ "clash_mode": "Global", "action": "route", "server": "dns-remote" }
 			],
 			"final": "dns-remote",
 			"independent_cache": true
@@ -126,19 +124,22 @@ function build_singbox_config(parsed) {
 				"server_port": parsed.server_port,
 				"version": "5",
 				"username": parsed.username,
-				"password": parsed.password
+				"password": parsed.password,
+				"domain_resolver": "dns-local"
 			},
-			{ "type": "direct", "tag": "direct" },
-			{ "type": "block",  "tag": "block"  },
-			{ "type": "dns",    "tag": "dns-out" }
+			{ "type": "direct", "tag": "direct" }
 		],
 		"route": {
 			"rules": [
-				{ "protocol": "dns",      "outbound": "dns-out" },
-				{ "clash_mode": "Direct", "outbound": "direct"  },
-				{ "clash_mode": "Global", "outbound": "proxy"   }
+				{ "inbound": "dns-in",    "action": "hijack-dns" },
+				{ "protocol": "dns",      "action": "hijack-dns" },
+				{ "clash_mode": "Direct", "action": "route", "outbound": "direct" },
+				{ "clash_mode": "Global", "action": "route", "outbound": "proxy" }
 			],
 			"final": "proxy",
+			"default_domain_resolver": {
+				"server": "dns-local"
+			},
 			"auto_detect_interface": true
 		}
 	};
