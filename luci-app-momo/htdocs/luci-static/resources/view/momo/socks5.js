@@ -141,11 +141,16 @@ function validateCredentials(raw) {
     return null; // valid
 }
 
+function normalizeName(raw) {
+    const str = (raw || '').trim();
+    if (!str) return '';
+    return str.endsWith('.json') ? str : (str + '.json');
+}
+
 function validateName(raw) {
     const str = (raw || '').trim();
     if (!str) return 'Filename is required';
     if (/[/\\]/.test(str)) return 'Filename must not contain path separators';
-    if (!str.endsWith('.json')) return 'Filename must end with .json';
     return null;
 }
 
@@ -195,7 +200,7 @@ return view.extend({
         const nameInput = E('input', {
             id: 'socks5-filename',
             type: 'text',
-            placeholder: 'my-proxy.json',
+            placeholder: 'my-proxy',
             autocomplete: 'off',
             spellcheck: 'false',
             style: 'width:180px'
@@ -246,6 +251,7 @@ return view.extend({
 
             const rawCred = credInput.value.trim();
             const rawName = nameInput.value.trim();
+            const finalName = normalizeName(rawName);
 
             /* client-side validation first */
             const credErr = validateCredentials(rawCred);
@@ -268,14 +274,14 @@ return view.extend({
             btn.disabled = true;
             btn.textContent = _('Creating…');
 
-            socks5.createSocks5Profile(rawName, rawCred).then(function(res) {
+            socks5.createSocks5Profile(finalName, rawCred).then(function(res) {
                 if (res && res.success) {
                     credInput.value = '';
                     nameInput.value = '';
                     credInput.classList.remove('socks5-input--error');
                     nameInput.classList.remove('socks5-input--error');
                     showMsg(msg, true,
-                        _('Profile created: ') + (res.path || rawName) +
+                        _('Profile created: ') + (res.path || finalName) +
                         _(' — you can now select it in App Config → Choose Profile.')
                     );
                 } else {

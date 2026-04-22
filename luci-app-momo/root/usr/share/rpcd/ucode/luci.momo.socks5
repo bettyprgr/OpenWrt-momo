@@ -104,6 +104,14 @@ function build_singbox_config(parsed) {
 				"network": "udp"
 			},
 			{
+				"type": "tun",
+				"tag": "tun-in",
+				"interface_name": "singtun0",
+				"address": ["172.19.0.1/30", "fdfe:dcba:9876::1/126"],
+				"mtu": 9000,
+				"auto_route": false
+			},
+			{
 				"type": "direct",
 				"tag": "dns-in",
 				"listen": "::",
@@ -147,10 +155,13 @@ const methods = {
 				return { success: false, error: 'Missing name or credentials' };
 			}
 
-			// Sanitise filename – strip path separators
-			const safe_name = replace(name, /[\/\\]/g, '');
+			// Sanitise filename – strip path separators, then ensure .json suffix
+			let safe_name = replace(name, /[\/\\]/g, '');
 			if (!safe_name) {
 				return { success: false, error: 'Invalid filename' };
+			}
+			if (!match(safe_name, /\.json$/)) {
+				safe_name += '.json';
 			}
 
 			const parsed = parse_socks5(trim(credentials));
