@@ -1,0 +1,10 @@
+{
+    "admin/services/momo/socks5": {
+        "title": "SOCKS5 Profile",
+        "order": 25,
+        "action": {
+            "type": "view",
+            "path": "momo/socks5"
+        }
+    }
+}
