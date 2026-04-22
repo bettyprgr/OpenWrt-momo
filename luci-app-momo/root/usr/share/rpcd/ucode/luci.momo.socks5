@@ -7,6 +7,7 @@ import { connect } from 'ubus';
 import { get_paths } from '/etc/momo/ucode/include.uc';
 
 const WAN_DNS_FALLBACK = '1.1.1.1';
+const MAIN_DNS_SERVER = '8.8.8.8';
 
 function first_dns_server(status) {
 	if (!status) return null;
@@ -114,17 +115,19 @@ function build_singbox_config(parsed, wan_dns) {
 				{
 					"tag": "default-dns",
 					"type": "udp",
-					"server": wan_dns
+					"server": wan_dns,
+					"detour": "direct"
 				},
 				{
 					"tag": "system-dns",
-					"type": "local"
+					"type": "local",
+					"detour": "direct"
 				},
 				{
 					"tag": "main-dns",
-					"type": "https",
-					"server": "1.1.1.2",
-					"path": "/dns-query",
+					"type": "tcp",
+					"server": MAIN_DNS_SERVER,
+					"server_port": 53,
 					"domain_resolver": {
 						"server": "default-dns",
 						"strategy": "ipv4_only"
