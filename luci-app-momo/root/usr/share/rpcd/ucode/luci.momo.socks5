@@ -76,8 +76,7 @@ function build_singbox_config(parsed) {
 					"tag": "dns-local",
 					"type": "https",
 					"server": "223.5.5.5",
-					"path": "/dns-query",
-					"detour": "direct"
+					"path": "/dns-query"
 				}
 			],
 			"rules": [
